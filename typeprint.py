@@ -1,44 +1,38 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+import sys, time, argparse, errno, os
+from pathlib import Path
 
-import sys, time, getopt
+def print_file(file, speed):
+    if not Path(file).is_file():
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), file)
+    else:
+        with open(file, "r") as rfile:
+            done = False
+            while not done:
+                pos = rfile.read(1)
+                sys.stdout.write(pos)
+                sys.stdout.flush()
+                if not pos:
+                    done = True
+                time.sleep(speed)
 
+def print_input(input, speed):
+    for letter in input:
+        sys.stdout.write(letter)
+        sys.stdout.flush()
+        time.sleep(speed)
 
-def main(argv):
-   inputfile = ''
-   speed = '5'
-   try:
-      opts, args = getopt.getopt(argv,"hi:s",["ifile=", "speed="])
-   except getopt.GetoptError:
-      print 'typeprint.py --ifile <inputfile> --speed <1 - 5>'
-      sys.exit(2)
-   for opt, arg in opts:
-      if opt in ("-i", "--ifile"):
-         inputfile = arg
-      elif opt in ("-s", "--speed"):
-         speed = arg 
-   wspeed = 0
-   if speed == '1':
-       wspeed = 0.5
-   elif speed == '2':
-       wspeed = 0.4
-   elif speed == '3':
-       wspeed = 0.3
-   elif speed == '4':
-       wspeed = 0.2
-   elif speed == '5':
-       wspeed = 0.1
-   with open(inputfile, "r") as file:
-     while 1 == 1:
-       readnum = file.read(1)
-       time.sleep(wspeed)
-       sys.stdout.write(readnum)
-       sys.stdout.flush()
-       if not readnum:
-         sys.exit()
-
-
-
-main(sys.argv[1:])
+parser = argparse.ArgumentParser()
+parser.add_argument("input", help="string or name of file to be printed.")
+parser.add_argument("-f", "--file", help="specifies that the input is a file. If not used, input is interpreted as string.", action='store_true')
+parser.add_argument("-s", "--speed", help="delay between printing each character in seconds. defaults to 0.1 if not specified.", type=float)
+args = parser.parse_args()
+if not args.speed:
+    args.speed = 0.1
+if args.file:
+    print_file(args.input, args.speed)
+else:
+    print_input(args.input, args.speed)
 
 
 
